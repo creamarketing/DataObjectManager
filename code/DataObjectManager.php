@@ -82,7 +82,7 @@ class DataObjectManager extends ComplexTableField
 	   self::$confirm_delete = $bool;
 	}
 	
-	function __construct($controller, $name = null, $sourceClass = null, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = null, $sourceJoin = "") 
+	function __construct($controller, $name = null, $sourceClass = null, $fieldList = null, $detailFormFields = null, $sourceFilter = "", $sourceSort = null, $sourceJoin = "", $skipNestedCheck = false) 
 	{
 		if(!class_exists("ComplexTableField_ItemRequest"))
 			die("<strong>"._t('DataObjectManager.ERROR','Error')."</strong>: "._t('DataObjectManager.SILVERSTRIPEVERSION','DataObjectManager requires Silverstripe version 2.3 or higher.'));
@@ -154,17 +154,18 @@ class DataObjectManager extends ComplexTableField
 		$this->loadSort();
 		$this->loadSourceFilter();
 
-		$fields = $this->getRawDetailFields(singleton($this->sourceClass()));
-		foreach($fields as $field) {
-		  if($field instanceof DataObjectManager && !($field->controller instanceof SiteTree)) {
-		    $this->hasNested = true;
-		    $this->setPopupWidth(850);
-		  }
-		  elseif(class_exists("KickAssetField") && $field instanceof KickAssetField) {
-			$this->setPopupWidth(850);
-		  }
+		if (!$skipNestedCheck) {
+			$fields = $this->getRawDetailFields(singleton($this->sourceClass()));
+			foreach($fields as $field) {
+			  if($field instanceof DataObjectManager && !($field->controller instanceof SiteTree)) {
+			    $this->hasNested = true;
+			    $this->setPopupWidth(850);
+			  }
+			  elseif(class_exists("KickAssetField") && $field instanceof KickAssetField) {
+				$this->setPopupWidth(850);
+			  }
+			}
 		}
-
 	}
 
 	public function setClickToToggle($bool) {
